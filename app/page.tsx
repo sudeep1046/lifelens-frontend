@@ -41,16 +41,20 @@ export default function ChatUI() {
     }
   };
 
-  // 📊 Fake chart data (for now)
-  const generateChartData = (glucose: number) => [
-    { day: "Mon", value: glucose - 10 },
-    { day: "Tue", value: glucose - 5 },
-    { day: "Wed", value: glucose },
-    { day: "Thu", value: glucose + 3 },
-    { day: "Fri", value: glucose - 2 },
-    { day: "Sat", value: glucose + 4 },
-    { day: "Sun", value: glucose },
-  ];
+  // 📊 SAFE Chart Data
+  const generateChartData = (glucose: number) => {
+    if (typeof glucose !== "number") return [];
+
+    return [
+      { day: "Mon", value: glucose - 10 },
+      { day: "Tue", value: glucose - 5 },
+      { day: "Wed", value: glucose },
+      { day: "Thu", value: glucose + 3 },
+      { day: "Fri", value: glucose - 2 },
+      { day: "Sat", value: glucose + 4 },
+      { day: "Sun", value: glucose },
+    ];
+  };
 
   const handleSend = async () => {
     if (!input) return;
@@ -88,14 +92,14 @@ export default function ChatUI() {
 
       setMessages((prev) => [...prev, aiMessage]);
 
-      // ✨ Typing effect
+      // Typing animation
       typeMessage(data.doctor_response || "", aiIndex);
     } catch {
       setMessages((prev) => [
         ...prev,
         {
           role: "ai",
-          content: { error: "⚠️ Backend error" },
+          content: { error: "Backend error" },
         },
       ]);
     }
@@ -106,10 +110,8 @@ export default function ChatUI() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col relative overflow-hidden">
 
-      {/* 🧠 Neural Glow */}
+      {/* Background */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.2),transparent_60%)]" />
-
-      {/* 💠 Grid */}
       <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#8881_1px,transparent_1px),linear-gradient(to_bottom,#8881_1px,transparent_1px)] bg-[size:40px_40px]" />
 
       {/* Header */}
@@ -123,7 +125,6 @@ export default function ChatUI() {
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 relative z-10">
 
         {messages.map((msg, index) => {
-          // 👤 USER
           if (msg.role === "user") {
             return (
               <div
@@ -137,7 +138,6 @@ export default function ChatUI() {
 
           const data = msg.content;
 
-          // ❌ Error case
           if (data?.error) {
             return (
               <div key={index} className="bg-red-500/20 p-3 rounded-xl">
@@ -169,8 +169,8 @@ export default function ChatUI() {
                 <Metric label="Anemia Risk" value={medical.anemia_risk ?? "N/A"} />
               </div>
 
-              {/* 📊 Chart */}
-              {medical.glucose && (
+              {/* Chart (SAFE) */}
+              {typeof medical.glucose === "number" && (
                 <div className="h-40 mt-4">
                   <p className="text-gray-400 text-xs mb-2 text-center">
                     Glucose Trend
@@ -193,15 +193,14 @@ export default function ChatUI() {
                 </div>
               )}
 
-              {/* Typing text */}
-              <p className="text-gray-300 text-sm">
+              {/* AI Response */}
+              <div style={{ whiteSpace: "pre-wrap" }}>
                 {data?.doctor_response || "..."}
-              </p>
+              </div>
             </div>
           );
         })}
 
-        {/* Loading */}
         {loading && (
           <div className="bg-white/10 p-3 rounded-xl w-fit">
             AI is thinking...
@@ -211,7 +210,6 @@ export default function ChatUI() {
 
       {/* Input */}
       <div className="p-4 border-t border-white/10 backdrop-blur-xl relative z-10">
-
         <div className="flex gap-2 max-w-3xl mx-auto">
 
           <input
@@ -240,7 +238,6 @@ export default function ChatUI() {
   );
 }
 
-/* Metric */
 function Metric({ label, value }: { label: string; value: any }) {
   return (
     <div className="bg-white/5 p-3 rounded-lg text-center">
