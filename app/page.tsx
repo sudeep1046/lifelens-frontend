@@ -22,7 +22,7 @@ export default function ChatUI() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // 🧠 Typing Animation
+  // Typing Animation (unchanged)
   const typeMessage = async (text: string, index: number) => {
     let current = "";
 
@@ -41,7 +41,7 @@ export default function ChatUI() {
     }
   };
 
-  // 📊 SAFE Chart Data
+  // Chart Data (unchanged)
   const generateChartData = (glucose: number) => {
     if (typeof glucose !== "number") return [];
 
@@ -56,6 +56,7 @@ export default function ChatUI() {
     ];
   };
 
+  // FIXED FUNCTION
   const handleSend = async () => {
     if (!input) return;
 
@@ -73,28 +74,41 @@ export default function ChatUI() {
     formData.append("question", input);
 
     try {
-      const res = await fetch("https://lifelens-backend-7py9.onrender.com/chat", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        "https://lifelens-backend-7py9.onrender.com/chat",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Server error");
+      }
 
       const data = await res.json();
 
-      const aiIndex = messages.length + 1;
+      let aiIndex = 0;
 
-      const aiMessage: Message = {
-        role: "ai",
-        content: {
-          ...data,
-          doctor_response: "",
-        },
-      };
+      setMessages((prev) => {
+        aiIndex = prev.length;
 
-      setMessages((prev) => [...prev, aiMessage]);
+        return [
+          ...prev,
+          {
+            role: "ai",
+            content: {
+              ...data,
+              doctor_response: "",
+            },
+          },
+        ];
+      });
 
-      // Typing animation
       typeMessage(data.doctor_response || "", aiIndex);
-    } catch {
+    } catch (err) {
+      console.error("Fetch error:", err);
+
       setMessages((prev) => [
         ...prev,
         {
@@ -153,7 +167,6 @@ export default function ChatUI() {
               key={index}
               className="max-w-xl bg-white/10 backdrop-blur-lg border border-white/10 p-5 rounded-2xl space-y-4"
             >
-              {/* Health Score */}
               <div className="text-center">
                 <p className="text-gray-400 text-xs">Health Score</p>
                 <h2 className="text-3xl text-green-400 font-semibold">
@@ -161,7 +174,6 @@ export default function ChatUI() {
                 </h2>
               </div>
 
-              {/* Metrics */}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <Metric label="Glucose" value={medical.glucose ?? "N/A"} />
                 <Metric label="Diabetes Risk" value={medical.diabetes_risk ?? "N/A"} />
@@ -169,7 +181,6 @@ export default function ChatUI() {
                 <Metric label="Anemia Risk" value={medical.anemia_risk ?? "N/A"} />
               </div>
 
-              {/* Chart (SAFE) */}
               {typeof medical.glucose === "number" && (
                 <div className="h-40 mt-4">
                   <p className="text-gray-400 text-xs mb-2 text-center">
@@ -193,7 +204,6 @@ export default function ChatUI() {
                 </div>
               )}
 
-              {/* AI Response */}
               <div style={{ whiteSpace: "pre-wrap" }}>
                 {data?.doctor_response || "..."}
               </div>
