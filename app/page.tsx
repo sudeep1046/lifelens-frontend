@@ -73,7 +73,7 @@ export default function ChatUI() {
     formData.append("question", input);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/chat", {
+      const res = await fetch("https://lifelens-backend-7py9.onrender.com/chat", {
         method: "POST",
         body: formData,
       });
