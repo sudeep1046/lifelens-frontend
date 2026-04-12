@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { orbitron } from "./fonts";
+// ❌ REMOVED fonts import (causing crash)
 import {
   LineChart,
   Line,
@@ -22,7 +22,6 @@ export default function ChatUI() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Typing Animation (unchanged)
   const typeMessage = async (text: string, index: number) => {
     let current = "";
 
@@ -41,7 +40,6 @@ export default function ChatUI() {
     }
   };
 
-  // Chart Data (unchanged)
   const generateChartData = (glucose: number) => {
     if (typeof glucose !== "number") return [];
 
@@ -56,7 +54,6 @@ export default function ChatUI() {
     ];
   };
 
-  // FIXED FUNCTION
   const handleSend = async () => {
     if (!input) return;
 
@@ -74,13 +71,20 @@ export default function ChatUI() {
     formData.append("question", input);
 
     try {
+      // ✅ TIMEOUT FIX (VERY IMPORTANT)
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+
       const res = await fetch(
         "https://lifelens-backend-7py9.onrender.com/chat",
         {
           method: "POST",
           body: formData,
+          signal: controller.signal,
         }
       );
+
+      clearTimeout(timeout);
 
       if (!res.ok) {
         throw new Error("Server error");
@@ -92,7 +96,6 @@ export default function ChatUI() {
 
       setMessages((prev) => {
         aiIndex = prev.length;
-
         return [
           ...prev,
           {
@@ -105,7 +108,7 @@ export default function ChatUI() {
         ];
       });
 
-      typeMessage(data.doctor_response || "", aiIndex);
+      typeMessage(data.doctor_response || "No response", aiIndex);
     } catch (err) {
       console.error("Fetch error:", err);
 
@@ -113,7 +116,9 @@ export default function ChatUI() {
         ...prev,
         {
           role: "ai",
-          content: { error: "Backend error" },
+          content: {
+            error: "Server is slow or unavailable. Please try again.",
+          },
         },
       ]);
     }
@@ -130,7 +135,7 @@ export default function ChatUI() {
 
       {/* Header */}
       <div className="relative z-10 p-6 text-center border-b border-white/10">
-        <h1 className={`${orbitron.className} text-3xl tracking-widest text-purple-400`}>
+        <h1 className="text-3xl tracking-widest text-purple-400">
           LIFELENS AI
         </h1>
       </div>
