@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-// ❌ REMOVED fonts import (causing crash)
 import {
   LineChart,
   Line,
@@ -22,6 +21,7 @@ export default function ChatUI() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // ✅ SAFE typing animation (no crash)
   const typeMessage = async (text: string, index: number) => {
     let current = "";
 
@@ -30,10 +30,22 @@ export default function ChatUI() {
 
       setMessages((prev) => {
         const updated = [...prev];
-        if (updated[index]) {
-          updated[index].content.doctor_response = current;
+
+        if (
+          updated[index] &&
+          updated[index].content &&
+          typeof updated[index].content === "object"
+        ) {
+          updated[index] = {
+            ...updated[index],
+            content: {
+              ...updated[index].content,
+              doctor_response: current,
+            },
+          };
         }
-        return [...updated];
+
+        return updated;
       });
 
       await new Promise((res) => setTimeout(res, 10));
@@ -54,6 +66,7 @@ export default function ChatUI() {
     ];
   };
 
+  // ✅ SAFE send function
   const handleSend = async () => {
     if (!input) return;
 
@@ -71,7 +84,6 @@ export default function ChatUI() {
     formData.append("question", input);
 
     try {
-      // ✅ TIMEOUT FIX (VERY IMPORTANT)
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000);
 
@@ -86,9 +98,7 @@ export default function ChatUI() {
 
       clearTimeout(timeout);
 
-      if (!res.ok) {
-        throw new Error("Server error");
-      }
+      if (!res.ok) throw new Error("Server error");
 
       const data = await res.json();
 
@@ -96,6 +106,7 @@ export default function ChatUI() {
 
       setMessages((prev) => {
         aiIndex = prev.length;
+
         return [
           ...prev,
           {
@@ -108,7 +119,8 @@ export default function ChatUI() {
         ];
       });
 
-      typeMessage(data.doctor_response || "No response", aiIndex);
+      typeMessage(data?.doctor_response || "No response", aiIndex);
+
     } catch (err) {
       console.error("Fetch error:", err);
 
@@ -210,7 +222,9 @@ export default function ChatUI() {
               )}
 
               <div style={{ whiteSpace: "pre-wrap" }}>
-                {data?.doctor_response || "..."}
+                {typeof data?.doctor_response === "string"
+                  ? data.doctor_response
+                  : "..."}
               </div>
             </div>
           );
