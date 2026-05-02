@@ -143,7 +143,7 @@ export default function AdvancedChatbot() {
     <div className="min-h-screen bg-black text-white flex flex-col relative overflow-hidden">
 
       {/* Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.2),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(85, 247, 166, 0.2),transparent_60%)]" />
       <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#8881_1px,transparent_1px),linear-gradient(to_bottom,#8881_1px,transparent_1px)] bg-[size:40px_40px]" />
 
       {/* Header */}
