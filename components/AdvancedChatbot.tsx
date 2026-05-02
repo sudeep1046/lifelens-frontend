@@ -16,7 +16,7 @@ type Message = {
   content: any;
 };
 
-export default function ChatUI() {
+export default function AdvancedChatbot() {
   const [file, setFile] = useState<File | null>(null);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
